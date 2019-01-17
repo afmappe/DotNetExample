@@ -29,7 +29,7 @@ namespace Example.Infraestructure.Data.Mapper
             Property(x => x.CreationDate).HasColumnName("CREATION_DATE");
             Property(x => x.CompletDate).HasColumnName("COMPLETE_DATE");
             Property(x => x.CategoryId).HasColumnName("CATEGORY_ID");
-            Property(x => x.StatusId).HasColumnName("STATUS_ID");
+            Property(x => x.Status).HasColumnName("STATUS_ID");
         }
     }
 }

@@ -1,89 +1,111 @@
-﻿using Example.Infraestructure.Services;
+﻿using Example.Entities;
+using Example.Infraestructure;
+using Example.Infraestructure.Services.Queue;
+using Executor;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Messaging;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity;
 
 namespace Example.Test
 {
     [TestClass]
     public class UnitTest2
     {
-        private readonly MessageQueueWindows QueueModule = new MessageQueueWindows();
+        private readonly IUnityContainer _Container;
 
-        public Task GetFromQueue(CancellationToken cancellationToken)
+        private StringBuilder builder;
+
+        public UnitTest2()
         {
-            return Task.Run(() =>
-            {
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    string a = QueueModule.Receive().ToString();
-                    Trace.WriteLine(a);
-                }
-            }, cancellationToken);
+            _Container = ApplicationContext.Instance.Container.CreateChildContainer();
+
+            builder = new StringBuilder();
         }
 
-        public void GetFromQueue2()
+        ~UnitTest2()
         {
-            MessageQueue queue = new MessageQueue(QueueModule.Path);
+            _Container.Dispose();
+            ApplicationContext.Instance.Container.Dispose();
+        }
 
-            try
-            {
-                queue.Formatter = new BinaryMessageFormatter();
-                queue.ReceiveCompleted += ReceiveCompleted;
-                QueueModule.BeginReceive(queue);
-                Task.Delay(30000).Wait();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            finally
-            {
-                queue.Dispose();
-            }
+        [TestMethod]
+        public void Executor()
+        {
+            ExecutorModule module = new ExecutorModule(_Container);
+            module.Initialize(new Dictionary<string, string> { { "TestLibray.dll", "TestLibray.TestContainerExtension" } });
+
+            IMessageQueue queue = _Container.Resolve<IMessageQueue>("Windows");
+            queue.Purge();
+
+            queue.Send(new ExecutionInfo { TaskId = "TestTask", Paramenters = new Dictionary<string, string> { { "name", "Task1" } } });
+            queue.Send(new ExecutionInfo { TaskId = "TestTask", Paramenters = new Dictionary<string, string> { { "name", "Task2" } } });
+
+            Task.Run(() => module.Start());
+            Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+
+            module.Stop();
+            module.Dispose();
+
+            Trace.WriteLine("END");
         }
 
         [TestMethod]
         public void Queue()
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource();
+            using (IMessageQueue queue = _Container.Resolve<IMessageQueue>("Windows"))
+            {
+                queue.ObjectReceive += ObjectReceive;
 
-            Task.Run(() => SendToQueue(tokenSource.Token)).Wait(1000);
-            tokenSource.Cancel();
+                queue.Purge();
 
-            GetFromQueue2();
-
-            //tokenSource = new CancellationTokenSource();
-            //Task.Run(() => GetFromQueue(tokenSource.Token)).Wait(500);
-            //tokenSource.Cancel();
-
-            Trace.WriteLine("End");
+                AddToQueue(queue);
+                ReceiveFromQueue(queue);
+            }
+            Trace.WriteLine(builder.ToString());
+            Trace.WriteLine("END");
         }
 
-        public Task SendToQueue(CancellationToken cancellationToken)
+        private void AddToQueue(IMessageQueue queue)
         {
-            int i = 0;
-            return Task.Run((() =>
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource())
             {
-                while (!cancellationToken.IsCancellationRequested)
+                Task task = Task.Run(() =>
                 {
-                    QueueModule.Send($"Hola Mundo-- {i} --{DateTime.Now}");
-                    i++;
-                }
-            }), cancellationToken);
+                    int i = 0;
+                    while (!tokenSource.Token.IsCancellationRequested)
+                    {
+                        queue.Send($"{i}");
+                        i++;
+                    }
+                }, tokenSource.Token);
+                tokenSource.CancelAfter(TimeSpan.FromSeconds(2));
+                Task.WaitAll(task);
+            }
         }
 
-        private void ReceiveCompleted(object sender, ReceiveCompletedEventArgs e)
+        private void ObjectReceive(object sender, ObjectReceivedEventArgs e)
         {
-            if (sender is MessageQueue queue)
-            {
-                object obj = e.Message.Body;
-                Trace.WriteLine(obj);
+            builder.Append($"{e.Data.ToString()},");
+        }
 
-                queue.BeginReceive();
+        private void ReceiveFromQueue(IMessageQueue queue)
+        {
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource())
+            {
+                Task task = Task.Run(() =>
+                {
+                    while (!tokenSource.Token.IsCancellationRequested)
+                    {
+                        queue.BeginReceive();
+                    }
+                }, tokenSource.Token);
+                tokenSource.CancelAfter(TimeSpan.FromSeconds(1));
+                Task.WaitAll(task);
             }
         }
     }

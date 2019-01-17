@@ -54,7 +54,7 @@ namespace Example.Infraestructure
         public ApplicationInstance()
         {
             Container = new UnityContainer();
-            Container.AddNewExtension<ContainerExtension>();
+            Container.AddNewExtension<ExampleContainerExtension>();
 
             //Adicionar interceptor UTC
             DbInterception.Add(new UtcDbCommandInterceptor());

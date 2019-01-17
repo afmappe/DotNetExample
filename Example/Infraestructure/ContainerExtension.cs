@@ -2,6 +2,7 @@
 using Example.Infraestructure.Data;
 using Example.Infraestructure.Data.Context;
 using Example.Infraestructure.Interfaces;
+using Example.Infraestructure.Services.Queue;
 using System.Data.Entity.Infrastructure;
 using System.Diagnostics;
 using Unity;
@@ -14,6 +15,13 @@ namespace Example.Infraestructure
     {
         protected override void Initialize()
         {
+        }
+    }
+
+    public class ExampleContainerExtension : ContainerExtension
+    {
+        protected override void Initialize()
+        {
             Trace.WriteLine("Register Extension");
 
             Container
@@ -21,7 +29,8 @@ namespace Example.Infraestructure
                 .RegisterGenericInterface(typeof(IDbContextFactory<>), () => new ContainerControlledLifetimeManager())
                 .RegisterGenericInterface(typeof(IAsyncRepository<>), () => new PerResolveLifetimeManager())
                 .RegisterInterface(typeof(IQueryRepository), () => new PerResolveLifetimeManager())
-                .RegisterMediator(new PerResolveLifetimeManager());
+                .RegisterMediator(new PerResolveLifetimeManager())
+                .RegisterType<IMessageQueue, MessageQueueWindows>("Windows");
         }
     }
 }

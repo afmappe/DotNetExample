@@ -129,6 +129,14 @@
       <Project>{d1fe48b2-7f02-423d-9474-00796c75c4c3}</Project>
       <Name>Example</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Services\Executor\Executor.csproj">
+      <Project>{3bbd5778-458c-4f7d-968e-d34ee09ca1fb}</Project>
+      <Name>Executor</Name>
+    </ProjectReference>
+    <ProjectReference Include="TestLibray\TestLibray.csproj">
+      <Project>{239dc6a7-fdbb-4e02-ac67-dbd3700d774d}</Project>
+      <Name>TestLibray</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

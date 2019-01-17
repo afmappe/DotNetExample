@@ -103,6 +103,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\DatabaseConfigurationInfo.cs" />
+    <Compile Include="Entities\ExecutionInfo.cs" />
     <Compile Include="Entities\PaginationInfo.cs" />
     <Compile Include="Extensions\IQueryableExt.cs" />
     <Compile Include="Extensions\IUnityContainerExt.cs" />
@@ -120,14 +121,18 @@
     <Compile Include="Infraestructure\Data\Repositories\TaskRepository.cs" />
     <Compile Include="Infraestructure\Data\UtcDbCommandInterceptor.cs" />
     <Compile Include="Infraestructure\Data\UtcDbDataReader.cs" />
+    <Compile Include="Infraestructure\Services\Queue\IMessageQueue.cs" />
     <Compile Include="Infraestructure\Interfaces\IAsyncRepository.cs" />
     <Compile Include="Infraestructure\Interfaces\IQueryRepository.cs" />
-    <Compile Include="Infraestructure\Services\MessageQueueWindows.cs" />
+    <Compile Include="Infraestructure\Services\Queue\MessageQueueWindows.cs" />
+    <Compile Include="Infraestructure\Services\Queue\ObjectReceivedEventArgs.cs" />
+    <Compile Include="Interfaces\ITask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\Command\CreateTaskCommand.cs" />
     <Compile Include="Tasks\Queries\GetTaskQuery.cs" />
     <Compile Include="Tasks\Repositories\ITaskQueryRepository.cs" />
     <Compile Include="Tasks\Repositories\ITaskRepository.cs" />
+    <Compile Include="Util\Disposable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

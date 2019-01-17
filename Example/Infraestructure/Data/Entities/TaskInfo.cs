@@ -3,6 +3,32 @@
 namespace Example.Infraestructure.Data.Entities
 {
     /// <summary>
+    /// Representa el estado de la ejecución de una tarea
+    /// </summary>
+    public enum TaskStatusCode
+    {
+        /// <summary>
+        /// Ejecución fallida
+        /// </summary>
+        Fail = 0,
+
+        /// <summary>
+        /// Ejecución finalizada exitosamente
+        /// </summary>
+        Success = 1,
+
+        /// <summary>
+        /// Ejecución pendiente
+        /// </summary>
+        NotStarted = 2,
+
+        /// <summary>
+        /// Ejecución en proceso
+        /// </summary>
+        Running = 3,
+    }
+
+    /// <summary>
     ///
     /// </summary>
     public class TaskInfo
@@ -40,6 +66,6 @@ namespace Example.Infraestructure.Data.Entities
         /// <summary>
         ///
         /// </summary>
-        public int StatusId { get; set; }
+        public TaskStatusCode Status { get; set; }
     }
 }
